@@ -14,14 +14,21 @@ public class TargetShape : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		player = GameObject.Find("Player").GetComponent<PlayerControl>();
+		PlayerControl.onEndGame+=dieOnEnd;
 	}
 
 	public void setParams(string l){
 		label = l;
 	}
-//	public void setParams(string l){
-//		label = l;
-//	}
+
+
+	private void dieOnEnd(){
+		Destroy(this.gameObject);
+	}
+
+	void OnDestroy(){
+		PlayerControl.onEndGame-=dieOnEnd;
+	}
 
 	// Update is called once per frame
 	void Update () {
@@ -55,15 +62,30 @@ public class TargetShape : MonoBehaviour {
 		rigidbody2D.velocity += new Vector2(toPlayer.x*velocity, toPlayer.y*velocity);//toPlayer;//new Vector2( -(Mathf.Sin(direction)*velocity), Mathf.Cos(direction)*velocity);
 	}
 
-	void OnCollisionEnter2D (Collision2D col)
+	void OnTriggerEnter2D (Collider2D col)
 	{
-		if(col.gameObject.name == "Laser(Clone)")
+		string goal = player.getMode(label);
+		//Debug.Log (label+"'s goal is "+goal);
+		if(goal!="avoid" && col.gameObject.name == "Laser(Clone)")
 		{
 			//Should spawn explosion
 			Destroy(this.gameObject);
 			Destroy(col.gameObject);
 			player.replaceShape();
-			player.checkGoal();
+
+			if(goal=="shoot")
+				player.checkGoal();
+		}
+
+		if(col.gameObject.name == "Player"){
+			if(goal=="collect"){
+				player.checkGoal();
+				Destroy(this.gameObject);
+			}
+
+			if(goal=="avoid"){
+				player.die();
+			}
 		}
 	}
 }
