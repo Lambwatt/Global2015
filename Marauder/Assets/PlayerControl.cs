@@ -6,13 +6,13 @@ public class Goal{
 
 	public string target;
 	public string type;//shoot, touch, avoid, free otherwise
-	public float time;
+	//public float time;
 	public int num;
 
 	public Goal(string tar, string typ, int nu, float tim){
 		target = tar;
 		type = typ;
-		time = tim;
+		//time = tim;
 		num = nu;
 	}
 }
@@ -21,6 +21,13 @@ public class PlayerControl : MonoBehaviour {
 
 	public delegate void EndGame();
 	public static event EndGame onEndGame;
+
+	public AudioClip avoid;
+	public AudioClip shoot;
+	public AudioClip collect;
+	public AudioClip dieSound;
+	public AudioClip point;
+	public AudioClip damage;
 
 	public GameObject projectile1;
 	public GameObject[] shapes;
@@ -40,13 +47,13 @@ public class PlayerControl : MonoBehaviour {
 	private GameObject UIPointer;
 	private Text count;
 	private Image img;
-	private Text time;
+	//private Text time;
 	private Text objective;
-	private Text livesCount;
+	private GameObject livesHolder;
 	private Text goalCount;
 
 
-	private GameObject timeFields;
+	//private GameObject timeFields;
 	private GameObject countFields;
 
 	private GameObject gameOverScreen;
@@ -72,19 +79,19 @@ public class PlayerControl : MonoBehaviour {
 		UIPointer = GameObject.Find("Goal");
 		UIPointer.SetActive(false);
 
-		count = UIPointer.transform.FindChild("CountFields").FindChild("count").GetComponent<Text>();
+		//count = UIPointer.transform.FindChild("CountFields").FindChild("count").GetComponent<Text>();
 
 		img = UIPointer.transform.FindChild("Image").GetComponent<Image>();
-		time = UIPointer.transform.FindChild("TimeFields").FindChild("time").GetComponent<Text>();
+		//time = UIPointer.transform.FindChild("TimeFields").FindChild("time").GetComponent<Text>();
 		objective = UIPointer.transform.FindChild("Objective").GetComponent<Text>();
-		livesCount = UIPointer.transform.FindChild("Lives").GetComponent<Text>();
+		livesHolder = UIPointer.transform.FindChild("LivesList").gameObject;
 		goalCount = gameOverScreen.transform.FindChild("GoalCount").GetComponent<Text>();
 //		Debug.Log (gameOverScreen.transform);
 //		Debug.Log (gameOverScreen.transform.FindChild("GoalCount"));
 //		Debug.Log (gameOverScreen.transform.FindChild("GoalCount").GetComponent<Text>());
 		
-		timeFields = UIPointer.transform.FindChild("TimeFields").gameObject;
-		countFields = UIPointer.transform.FindChild("CountFields").gameObject;
+		//timeFields = UIPointer.transform.FindChild("TimeFields").gameObject;
+		//countFields = UIPointer.transform.FindChild("CountFields").gameObject;
 
 	}
 
@@ -95,15 +102,15 @@ public class PlayerControl : MonoBehaviour {
 		goalsAccomplished = 0;
 		goals = new Goal[]{new Goal("diamond", "shoot", 10, 0)};
 		objective.text = ""+goals[0].type;
-		count.text = ""+goals[0].num;
+		//count.text = ""+goals[0].num;
 		gameObject.renderer.enabled = true;
 		transform.position = new Vector3(0.0f,0.0f,0.0f);
 		inMenu = false;
 		lives = 3;
-		livesCount.text = ""+lives;
+		//livesCount.text = ""+lives;
 
-		timeFields.SetActive(false);
-		countFields.SetActive(true);
+		//timeFields.SetActive(false);
+		//countFields.SetActive(true);
 
 		for(int  i = 0; i<shapeCount; i++){
 			int selection = (int)Mathf.Floor(Random.Range(0,shapes.Length));
@@ -119,6 +126,7 @@ public class PlayerControl : MonoBehaviour {
 		}
 
 		inMenu = false;
+		audio.PlayOneShot(shoot, 0.7F);
 
 
 	}
@@ -138,6 +146,7 @@ public class PlayerControl : MonoBehaviour {
 
 		//Explode, wait, and go to game over screen;
 		//hide goals and Show Game over screen
+		audio.PlayOneShot(dieSound, 0.7F);
 		Debug.Log(goalsAccomplished);
 		Debug.Log(goalCount);
 		goalCount.text = ""+goalsAccomplished;
@@ -240,12 +249,17 @@ public class PlayerControl : MonoBehaviour {
 		}
 
 		if(goals[0].type=="avoid"){
-			goals[0].time-=Time.deltaTime;
-			time.text = ""+Mathf.Ceil(goals[0].time);
-			if(goals[0].time <= 0){
-				goalsAccomplished++;
-				setGoal();
-			}
+			//goals[0].time-=Time.deltaTime;
+//			float oldTime = goals[0].time;
+//			time.text = ""+Mathf.Ceil(goals[0].time);
+//
+//			if(Mathf.Ceil(goals[0].time)<Mathf.Ceil(oldTime))
+//				audio.PlayOneShot(point, 0.7F);
+//
+//			if(goals[0].time <= 0){
+//				goalsAccomplished++;
+//				setGoal();
+//			}
 		}
 
 		//Debug.Log(GameObject.FindGameObjectsWithTag("Shape").Length);
@@ -272,6 +286,7 @@ public class PlayerControl : MonoBehaviour {
 	public void checkGoal(){
 
 		goals[0].num--;
+		audio.PlayOneShot(point, 0.7F);
 		if(goals[0].num<=0){
 			goalsAccomplished++;
 			setGoal();
@@ -290,8 +305,8 @@ public class PlayerControl : MonoBehaviour {
 		if(gT=="avoid"){
 			goals[0] = new Goal(shapeNames[shapeIndex],gT,0,10.0f);
 			img.sprite = shapes[shapeIndex].GetComponent<SpriteRenderer>().sprite;
-			time.text = ""+Mathf.Ceil(goals[0].time);
-			timeFields.SetActive(true);//.GetComponent<CanvasRenderer>().enabled = true;
+//			time.text = ""+Mathf.Ceil(goals[0].time);
+//			timeFields.SetActive(true);//.GetComponent<CanvasRenderer>().enabled = true;
 			countFields.SetActive(false);//.GetComponent<CanvasRenderer>().enabled = false;
 			//set Image
 
@@ -301,15 +316,29 @@ public class PlayerControl : MonoBehaviour {
 			goals[0] = new Goal(shapeNames[shapeIndex],gT,10,0.0f);
 			img.sprite = shapes[shapeIndex].GetComponent<SpriteRenderer>().sprite;
 			count.text = ""+goals[0].num;
-			timeFields.SetActive(false);//GetComponent<CanvasRenderer>().renderer.enabled = false;
+			//timeFields.SetActive(false);//GetComponent<CanvasRenderer>().renderer.enabled = false;
 			countFields.SetActive(true);//.GetComponent<CanvasRenderer>().renderer.enabled = true;
 		}
 		objective.text = gT;
 
+		switch(gT){
+		case "avoid":
+			audio.PlayOneShot(avoid, 0.7F);
+			break;
+		case "collect":
+			audio.PlayOneShot(collect, 0.7F);
+			break;
+		case "shoot":
+			audio.PlayOneShot(shoot, 0.7F);
+			break;
+		default:
+			break;
+		}
+
 	}
 
 	public void die(){
-
+		audio.PlayOneShot(damage, 0.7F);
 		if(lives>1){
 			lives--;
 			livesCount.text = ""+lives;
