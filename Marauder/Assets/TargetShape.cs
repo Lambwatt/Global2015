@@ -15,6 +15,7 @@ public class TargetShape : MonoBehaviour {
 	void Start () {
 		player = GameObject.Find("Player").GetComponent<PlayerControl>();
 		PlayerControl.onEndGame+=dieOnEnd;
+		//player.onSolid(shape);
 	}
 
 	public void setParams(string l){
@@ -30,10 +31,18 @@ public class TargetShape : MonoBehaviour {
 		PlayerControl.onEndGame-=dieOnEnd;
 	}
 
+//	private void hitbox(string l){
+//		if(label==l){
+//			//Add hitbox
+//		}else{
+//
+//		}
+//	}
+
+
 	// Update is called once per frame
 	void Update () {
-		if(player.getMode(label)=="avoid"){
-			//Debug.Log("run");
+		if(player.getMode(label)=="hostile"){
 			pursue();
 		}else{
 			fly();
@@ -66,24 +75,24 @@ public class TargetShape : MonoBehaviour {
 	{
 		string goal = player.getMode(label);
 		//Debug.Log (label+"'s goal is "+goal);
-		if(goal!="avoid" && col.gameObject.name == "Laser(Clone)")
-		{
-			//Should spawn explosion
-			Destroy(this.gameObject);
-			Destroy(col.gameObject);
-			player.replaceShape();
-
-			if(goal=="shoot")
-				player.checkGoal();
-		}
+//		if(goal!="hunt")
+//		{
+//			//Should spawn explosion
+//
+//			//Destroy(col.gameObject);
+//			player.replaceShape();
+//			Destroy(this.gameObject);			
+//			//if(goal=="shoot")
+////				player.checkGoal();
+//		}
 
 		if(col.gameObject.name == "Player"){
 			if(goal=="collect"){
-				player.checkGoal();
+				player.addPoint();
 				Destroy(this.gameObject);
 			}
 
-			if(goal=="avoid"){
+			if(goal=="dangerous"||goal=="hostile"){
 				player.die();
 			}
 		}
