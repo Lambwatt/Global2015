@@ -19,6 +19,7 @@ public class PlayerControl : MonoBehaviour {
 	//Game paramaters
 	public GameObject projectile1;
 	public GameObject[] shapes;
+	public GameObject[] sprites;
 	public string[] shapeNames;
 	public float minDistance;
 	public float maxDistance;
@@ -137,20 +138,25 @@ public class PlayerControl : MonoBehaviour {
 	}
 
 	//Goal management---------------------------------------------------------------
-	void addGoal(int tar, string typ, int nu){
-		goals.Add(shapeNames[tar], typ);
-		GameObject listPointer = null;
-		if(shapeList.TryGetValue(typ, out listPointer)){
-			GameObject img = new GameObject();
-			img.AddComponent("SpriteRenderer");
-			img.GetComponent<SpriteRenderer>().sprite = shapes[tar].GetComponent<SpriteRenderer>().sprite;  //.sprite = 
-			img.transform.SetParent(listPointer.transform);
-			img.name = shapeNames[tar];
-		}
+	void addGoal(KeyValuePair<string, string> kp){
+		Debug.Log(kp.Key+":"+kp.Value);
+
+		goals.Add(kp.Key, kp.Value);
+
+		GameObject img = Instantiate(sprites[shapeIndexOf(kp.Key)]) as GameObject;//new GameObject();
+		Debug.Log(img);
+		img.AddComponent<Image>();
+
+		img.GetComponent<Image>().sprite = shapes[shapeIndexOf(kp.Key)].GetComponent<SpriteRenderer>().sprite;  //.sprite = 
+
+		img.transform.SetParent(shapeList[kp.Value].transform, false);
+		img.name = kp.Key;//"bababoi";
+		Debug.Log(shapeList[kp.Value].transform.FindChild(kp.Key).gameObject+":"+shapeList[kp.Value].transform.FindChild(kp.Key).gameObject.name);
 
 	}
 
 	void finishGoal(string k){//KeyValuePair<string, string> kp){
+		Debug.Log("finishing Goal "+k);
 		GameObject listPointer = null;
 		if(shapeList.TryGetValue(goals[k], out listPointer)){
 			GameObject img = shapeList[goals[k]].transform.FindChild(k).gameObject;//listPointer.transform.FindChild(k).gameObject;
@@ -176,8 +182,9 @@ public class PlayerControl : MonoBehaviour {
 		}
 
 		//generate new goals and add them
-		//addGoal();
-
+		addGoal(generateGoal(true));
+		addGoal(generateGoal(true));
+		//addGoal(generateGoal(false));
 
 	}
 
@@ -360,6 +367,8 @@ public class PlayerControl : MonoBehaviour {
 //		}
 	}
 
+
+
 //	public void setGoal(){
 //		//swap goal
 //		Debug.Log("Accomplished goal");
@@ -416,5 +425,14 @@ public class PlayerControl : MonoBehaviour {
 
 	int zeroToN(int n){
 		return (int)Mathf.Floor(Random.Range(0,(float)n));
+	}
+
+	int shapeIndexOf(string label){
+		for(int i =0; i<shapeNames.Length; i++){
+			if(shapeNames[i]==label){
+				return i;
+			}
+		}
+		return -1;
 	}
 }
