@@ -42,6 +42,7 @@ public class PlayerControl : MonoBehaviour {
 	private GameObject solidHolder;
 	private GameObject dangerousHolder;
 	private GameObject hostileHolder;
+	private Text pointsHolder;
 
 	private GameObject gameOverScreen;
 	private GameObject startScreen;
@@ -67,6 +68,7 @@ public class PlayerControl : MonoBehaviour {
 		UIPointer.SetActive(false);
 
 		livesHolder = UIPointer.transform.FindChild("LivesList").gameObject;
+
 		collectHolder = UIPointer.transform.FindChild("CollectableList").gameObject;
 		shapeList.Add("collect", collectHolder);
 //		solidHolder = UIPointer.transform.FindChild("SolidList").gameObject;
@@ -75,12 +77,15 @@ public class PlayerControl : MonoBehaviour {
 		shapeList.Add("dangerous", dangerousHolder);
 		hostileHolder = UIPointer.transform.FindChild("HostileList").gameObject;
 		shapeList.Add("hostile", hostileHolder);
-		shapesCollected = gameOverScreen.transform.FindChild("GoalCount").GetComponent<Text>();
 
+		pointsHolder = UIPointer.transform.FindChild("ScoreSet").FindChild("Score").GetComponent<Text>();
+
+		shapesCollected = gameOverScreen.transform.FindChild("GoalCount").GetComponent<Text>();
 	}
 
 	void startGame(){
-
+		points = 0;
+		pointsHolder.text = ""+points;
 		UIPointer.SetActive(true);
 		startScreen.SetActive(false);
 		goalsAccomplished = 0;
@@ -206,7 +211,7 @@ public class PlayerControl : MonoBehaviour {
 		//Explode, wait, and go to game over screen;
 		//hide goals and Show Game over screen
 		audio.PlayOneShot(dieSound, 0.7F);
-		shapesCollected.text = ""+goalsAccomplished;
+		shapesCollected.text = ""+points;
 		gameOver = true;
 		this.gameObject.renderer.enabled = false;
 		UIPointer.SetActive(false);
@@ -306,7 +311,7 @@ public class PlayerControl : MonoBehaviour {
 
 		points++;
 		audio.PlayOneShot(collect, 0.7F);
-		shapesCollected.text = ""+points;
+		pointsHolder.text = ""+points;
 		if(points%10==0){
 			changeGoals();
 		}
@@ -314,9 +319,11 @@ public class PlayerControl : MonoBehaviour {
 	}
 
 	public void die(){
-		if(lives<0)
+		if(lives<0){
 			return;
+		}
 
+		Debug.Log ("proceeding with "+lives);
 		audio.PlayOneShot(damage, 0.7F);
 		Destroy(livesHolder.transform.FindChild("life").gameObject);
 
