@@ -18,6 +18,7 @@ public class PlayerControl : MonoBehaviour {
 
 	//Game paramaters
 	public GameObject projectile1;
+	public GameObject playerSprite;
 	public GameObject[] shapes;
 	public GameObject[] sprites;
 	public string[] shapeNames;
@@ -35,20 +36,12 @@ public class PlayerControl : MonoBehaviour {
 
 	//Things that are in the UI
 	private GameObject UIPointer;
-	//private Text count;
-	//private Image img;
-	//private Text time;
-	//private Text objective;
 	private GameObject livesHolder;
 	private Text shapesCollected;
 	private GameObject collectHolder;
 	private GameObject solidHolder;
 	private GameObject dangerousHolder;
 	private GameObject hostileHolder;
-	//private Text livesCount;
-	
-	//private GameObject timeFields;
-	//private GameObject countFields;
 
 	private GameObject gameOverScreen;
 	private GameObject startScreen;
@@ -73,13 +66,7 @@ public class PlayerControl : MonoBehaviour {
 		UIPointer = GameObject.Find("Goal");
 		UIPointer.SetActive(false);
 
-		//count = UIPointer.transform.FindChild("CountFields").FindChild("count").GetComponent<Text>();
-
-		//img = UIPointer.transform.FindChild("Image").GetComponent<Image>();
-		//time = UIPointer.transform.FindChild("TimeFields").FindChild("time").GetComponent<Text>();
-		//objective = UIPointer.transform.FindChild("Objective").GetComponent<Text>();
 		livesHolder = UIPointer.transform.FindChild("LivesList").gameObject;
-		Debug.Log(UIPointer);
 		collectHolder = UIPointer.transform.FindChild("CollectableList").gameObject;
 		shapeList.Add("collect", collectHolder);
 //		solidHolder = UIPointer.transform.FindChild("SolidList").gameObject;
@@ -90,14 +77,6 @@ public class PlayerControl : MonoBehaviour {
 		shapeList.Add("hostile", hostileHolder);
 		shapesCollected = gameOverScreen.transform.FindChild("GoalCount").GetComponent<Text>();
 
-		//livesCount = lives
-//		Debug.Log (gameOverScreen.transform);
-//		Debug.Log (gameOverScreen.transform.FindChild("GoalCount"));
-//		Debug.Log (gameOverScreen.transform.FindChild("GoalCount").GetComponent<Text>());
-		
-		//timeFields = UIPointer.transform.FindChild("TimeFields").gameObject;
-		//countFields = UIPointer.transform.FindChild("CountFields").gameObject;
-
 	}
 
 	void startGame(){
@@ -105,22 +84,23 @@ public class PlayerControl : MonoBehaviour {
 		UIPointer.SetActive(true);
 		startScreen.SetActive(false);
 		goalsAccomplished = 0;
-//		goals = new Goal[]{new Goal("diamond", "collect", 10)};
-		//objective.text = ""+goals[0].type;
-		//count.text = ""+goals[0].num;
 		gameObject.renderer.enabled = true;
 		transform.position = new Vector3(0.0f,0.0f,0.0f);
 		inMenu = false;
 		lives = 3;
-		//livesCount.text = ""+lives;
+		for (int j = 0; j<lives; j++){
+			GameObject img = Instantiate(playerSprite) as GameObject;
+			img.AddComponent<Image>();
+			
+			img.GetComponent<Image>().sprite = playerSprite.GetComponent<SpriteRenderer>().sprite; 
+			
+			img.transform.SetParent(livesHolder.transform, false);
+			img.name = "life";
+		}
 
-		//timeFields.SetActive(false);
-		//countFields.SetActive(true);
 
 		for(int  i = 0; i<shapeCount; i++){
-			int selection = zeroToN(shapes.Length);//(int)Mathf.Floor(Random.Range(0,shapes.Length));
-			//Debug.Log(selection);
-			//Debug.Log(shapes[selection]);
+			int selection = zeroToN(shapes.Length);
 			GameObject shape = Instantiate(shapes[selection], 
 			                               new Vector3(transform.position.x + Random.Range(-maxDistance, maxDistance), 
 			            transform.position.y+Random.Range(-maxDistance, maxDistance)), 
@@ -139,24 +119,21 @@ public class PlayerControl : MonoBehaviour {
 
 	//Goal management---------------------------------------------------------------
 	void addGoal(KeyValuePair<string, string> kp){
-		Debug.Log(kp.Key+":"+kp.Value);
 
 		goals.Add(kp.Key, kp.Value);
 
-		GameObject img = Instantiate(sprites[shapeIndexOf(kp.Key)]) as GameObject;//new GameObject();
-		Debug.Log(img);
+		GameObject img = Instantiate(sprites[shapeIndexOf(kp.Key)]) as GameObject;
 		img.AddComponent<Image>();
 
-		img.GetComponent<Image>().sprite = shapes[shapeIndexOf(kp.Key)].GetComponent<SpriteRenderer>().sprite;  //.sprite = 
+		img.GetComponent<Image>().sprite = shapes[shapeIndexOf(kp.Key)].GetComponent<SpriteRenderer>().sprite; 
 
 		img.transform.SetParent(shapeList[kp.Value].transform, false);
-		img.name = kp.Key;//"bababoi";
-		Debug.Log(shapeList[kp.Value].transform.FindChild(kp.Key).gameObject+":"+shapeList[kp.Value].transform.FindChild(kp.Key).gameObject.name);
+		img.name = kp.Key;
 
 	}
 
-	void finishGoal(string k){//KeyValuePair<string, string> kp){
-		Debug.Log("finishing Goal "+k);
+	void finishGoal(string k){
+
 		GameObject listPointer = null;
 		if(shapeList.TryGetValue(goals[k], out listPointer)){
 			GameObject img = shapeList[goals[k]].transform.FindChild(k).gameObject;//listPointer.transform.FindChild(k).gameObject;
@@ -166,7 +143,7 @@ public class PlayerControl : MonoBehaviour {
 	}
 
 	void changeGoals(){
-		//Dictionary<string, string>.Enumerator e = ;
+
 		foreach(KeyValuePair<string, string> kp in goals){
 			if(kp.Value == "collect"){
 				finishGoal(kp.Key);
@@ -175,7 +152,7 @@ public class PlayerControl : MonoBehaviour {
 		}
 
 		if(goals.Count>0){
-			string[] keys = new string[0];
+			string[] keys = new string[goals.Count];
 			goals.Keys.CopyTo(keys, 0);
 			string k = keys[zeroToN(goals.Count)];
 			finishGoal(k);
@@ -183,8 +160,7 @@ public class PlayerControl : MonoBehaviour {
 
 		//generate new goals and add them
 		addGoal(generateGoal(true));
-		addGoal(generateGoal(true));
-		//addGoal(generateGoal(false));
+		addGoal(generateGoal(false));
 
 	}
 
@@ -230,8 +206,6 @@ public class PlayerControl : MonoBehaviour {
 		//Explode, wait, and go to game over screen;
 		//hide goals and Show Game over screen
 		audio.PlayOneShot(dieSound, 0.7F);
-		Debug.Log(goalsAccomplished);
-		Debug.Log(shapesCollected);
 		shapesCollected.text = ""+goalsAccomplished;
 		gameOver = true;
 		this.gameObject.renderer.enabled = false;
@@ -313,29 +287,9 @@ public class PlayerControl : MonoBehaviour {
 			default:
 				break;
 		}
-		//camera.transform.eulerAngles = new Vector3(0,0,0);
 
 		float a = Mathf.Deg2Rad*transform.eulerAngles.z;
-		//float velocity = 0.0f;//5.0f;
 		rigidbody2D.velocity = new Vector2( -(Mathf.Sin(a)*velocity), Mathf.Cos(a)*velocity);
-
-
-
-		//if(goals[0].type=="avoid"){
-			//goals[0].time-=Time.deltaTime;
-//			float oldTime = goals[0].time;
-//			time.text = ""+Mathf.Ceil(goals[0].time);
-//
-//			if(Mathf.Ceil(goals[0].time)<Mathf.Ceil(oldTime))
-//				audio.PlayOneShot(point, 0.7F);
-//
-//			if(goals[0].time <= 0){
-//				goalsAccomplished++;
-//				setGoal();
-//			}
-		//}
-
-		//Debug.Log(GameObject.FindGameObjectsWithTag("Shape").Length);
 
 	}
 	
@@ -344,7 +298,6 @@ public class PlayerControl : MonoBehaviour {
 		float magnitude = Random.Range(minDistance, maxDistance);
 
 		Instantiate(shapes[zeroToN(shapes.Length)], new Vector3(transform.position.x -(Mathf.Sin(angle)*magnitude), transform.position.y+Mathf.Cos(angle)*magnitude), Quaternion.identity);
-		//Destroy(this.gameObject);
 	}
 
 
@@ -352,71 +305,23 @@ public class PlayerControl : MonoBehaviour {
 	public void addPoint(){
 
 		points++;
+		audio.PlayOneShot(collect, 0.7F);
 		shapesCollected.text = ""+points;
 		if(points%10==0){
 			changeGoals();
 		}
-		//goals[0].num--;
-//		audio.PlayOneShot(point, 0.7F);/**/
-//		if(goals[0].num<=0){
-//			goalsAccomplished++;
-//			setGoal();
-//		}
-//		else{
-//			//count.text = ""+goals[0].num;
-//		}
+
 	}
 
-
-
-//	public void setGoal(){
-//		//swap goal
-//		Debug.Log("Accomplished goal");
-//		string gT = goalTypes[(int)Mathf.Floor(Random.Range(0,goalTypes.Length))];
-//		int shapeIndex = (int)Mathf.Floor(Random.Range(0,shapes.Length));
-//	
-//		if(gT=="hunt"){
-//			//goals[0] = new Goal(shapeNames[shapeIndex],gT,0,10.0f);
-////			img.sprite = shapes[shapeIndex].GetComponent<SpriteRenderer>().sprite;
-////			time.text = ""+Mathf.Ceil(goals[0].time);
-////			timeFields.SetActive(true);//.GetComponent<CanvasRenderer>().enabled = true;
-////			countFields.SetActive(false);//.GetComponent<CanvasRenderer>().enabled = false;
-//			//set Image
-//
-//		}else{
-//
-//			//
-////			goals[0] = new Goal(shapeNames[shapeIndex],gT,10,0.0f);
-//			//img.sprite = shapes[shapeIndex].GetComponent<SpriteRenderer>().sprite;
-//			//count.text = ""+goals[0].num;
-//			//timeFields.SetActive(false);//GetComponent<CanvasRenderer>().renderer.enabled = false;
-////			countFields.SetActive(true);//.GetComponent<CanvasRenderer>().renderer.enabled = true;
-//		}
-//		//objective.text = gT;
-//
-//		switch(gT){
-//		case "avoid":
-//			audio.PlayOneShot(avoid, 0.7F);
-//			break;
-//		case "collect":
-//			audio.PlayOneShot(collect, 0.7F);
-//			break;
-////		case "shoot":
-////			audio.PlayOneShot(shoot, 0.7F);
-////			break;
-//		default:
-//			break;
-//		}
-//
-//	}
-
 	public void die(){
+		if(lives<0)
+			return;
+
 		audio.PlayOneShot(damage, 0.7F);
+		Destroy(livesHolder.transform.FindChild("life").gameObject);
+
 		if(lives>1){
 			lives--;
-			Debug.Log (lives);
-			//livesCount.text = ""+lives;
-			//setGoal();
 		}else{
 			goToGameOver();
 
