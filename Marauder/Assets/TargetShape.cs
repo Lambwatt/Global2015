@@ -1,48 +1,59 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//PlayerControl-------------------------------------------------------
+//Contains logic for managing each shape
 public class TargetShape : MonoBehaviour {
-	
-	private float direction;
+
+	//variables set in editor----------------------------------
 	public float velocity;
 	public float threshold;
-	private PlayerControl player;
-	private float elapsedTime;
 	public string label;
 
-	// Use this for initialization
+	//internal variables
+	private float direction;
+	private PlayerControl player;
+	private float elapsedTime;
+
+	//set up pointer to player and register event
 	void Start () {
 		player = GameObject.Find("Player").GetComponent<PlayerControl>();
 		PlayerControl.onEndGame+=dieOnEnd;
 	}
 
+	//set label
 	public void setParams(string l){
 		label = l;
 	}
 
-
+	//destroy self
 	private void dieOnEnd(){
 		Destroy(this.gameObject);
 	}
 
+	//de-register event
 	void OnDestroy(){
 		PlayerControl.onEndGame-=dieOnEnd;
 	}
 
-	// Update is called once per frame
+	//behaviour loop
 	void Update () {
+
+		//check if far enough from player to die and replace
+		if(Vector3.Distance(player.transform.position, transform.position)>threshold){
+			Destroy(this.gameObject);
+			player.replaceShape();
+		}
+
+		//decide if flying randomly or following player based on goal of shape
 		if(player.getMode(label)=="hostile"){
 			pursue();
 		}else{
 			fly();
 		}
-
-		if(Vector3.Distance(player.transform.position, transform.position)>threshold){
-			Destroy(this.gameObject);
-			player.replaceShape();
-		}
 	}
 
+	//fly in a random direction
 	void fly(){
 		elapsedTime -= Time.deltaTime;
 		if(elapsedTime<0){
@@ -52,23 +63,25 @@ public class TargetShape : MonoBehaviour {
 		rigidbody2D.velocity += new Vector2( -(Mathf.Sin(direction)*velocity), Mathf.Cos(direction)*velocity);
 	}
 
+	//fly toward the player
 	void pursue(){
 
 		Vector3 toPlayer = (player.transform.position - transform.position).normalized;
 		rigidbody2D.velocity += new Vector2(toPlayer.x*velocity, toPlayer.y*velocity);
 	}
 
+	//resolve collisions by adding a point or hurting the player
 	void OnTriggerEnter2D (Collider2D col)
 	{
-		string goal = player.getMode(label);
 
+		//only count player collision
 		if(col.gameObject.name == "Player"){
+
+			string goal = player.getMode(label);
 			if(goal=="collect"){
 				player.addPoint();
 				Destroy(this.gameObject);
-			}
-
-			if(goal=="dangerous"||goal=="hostile"){
+			}else if(goal=="dangerous"||goal=="hostile"){
 				player.die();
 			}
 		}
