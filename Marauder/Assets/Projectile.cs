@@ -11,7 +11,7 @@ public class Projectile : MonoBehaviour {
 
 	public void setParams(float v, float d, Vector3 s, float r){
 
-		rigidbody2D.velocity = new Vector2( -(Mathf.Sin(d)*v*laserSpeed), Mathf.Cos(d)*v*laserSpeed);
+		GetComponent<Rigidbody2D>().velocity = new Vector2( -(Mathf.Sin(d)*v*laserSpeed), Mathf.Cos(d)*v*laserSpeed);
 		start = s;
 		range = r;
 

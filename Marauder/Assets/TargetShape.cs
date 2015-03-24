@@ -40,7 +40,7 @@ public class TargetShape : MonoBehaviour {
 	void Update () {
 
 		//check if far enough from player to die and replace
-		if(Vector3.Distance(player.transform.position, transform.position)>threshold){
+		if(Vector3.Distance(player.GetComponent<Transform>().position, GetComponent<Transform>().position)>threshold){
 			Destroy(this.gameObject);
 			player.replaceShape();
 		}
@@ -60,14 +60,14 @@ public class TargetShape : MonoBehaviour {
 			direction = Random.Range(0,360)*Mathf.Deg2Rad;
 			elapsedTime = 2;
 		}
-		rigidbody2D.velocity += new Vector2( -(Mathf.Sin(direction)*velocity), Mathf.Cos(direction)*velocity);
+		GetComponent<Rigidbody2D>().velocity += new Vector2( -(Mathf.Sin(direction)*velocity), Mathf.Cos(direction)*velocity);
 	}
 
 	//fly toward the player
 	void pursue(){
 
-		Vector3 toPlayer = (player.transform.position - transform.position).normalized;
-		rigidbody2D.velocity += new Vector2(toPlayer.x*velocity, toPlayer.y*velocity);
+		Vector3 toPlayer = (player.GetComponent<Transform>().position - GetComponent<Transform>().position).normalized;
+		GetComponent<Rigidbody2D>().velocity += new Vector2(toPlayer.x*velocity, toPlayer.y*velocity);
 	}
 
 	//resolve collisions by adding a point or hurting the player

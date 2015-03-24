@@ -42,17 +42,19 @@ public class PlayerControl : MonoBehaviour {
 	private bool inMenu = true;
 	private bool gameOver = false;
 
+	private Transform myTransform;
+
 	//refernces to the ui 
-	private GameObject goalUI;
-	private GameObject livesHolder;
-	private Text shapesCollected;
-	private GameObject collectHolder;
-	private GameObject solidHolder;
-	private GameObject dangerousHolder;
-	private GameObject hostileHolder;
-	private Text pointsHolder;
-	private GameObject gameOverScreen;
-	private GameObject startScreen;
+	public GameObject goalUI;
+	public GameObject livesHolder;
+	public Text shapesCollected;
+	public GameObject collectHolder;
+//	public GameObject solidHolder;
+	public GameObject dangerousHolder;
+	public GameObject hostileHolder;
+	public Text pointsHolder;
+	public GameObject gameOverScreen;
+	public GameObject startScreen;
 
 	//list of goal labels
 	private string[] goalTypes = {"collect", "dangerous", "hostile"};
@@ -63,36 +65,21 @@ public class PlayerControl : MonoBehaviour {
 
 	//hide player initially since the game opens on a menu
 	void Awake(){
-		this.gameObject.renderer.enabled = false;
+		this.gameObject.GetComponent<Renderer>().enabled = false;
+		myTransform = GetComponent<Transform>();
 	}
 
 	//set up pointers and set initial menu state
 	void Start () {
-
-		//get canvas pointers and show only start canvas
-		gameOverScreen = GameObject.Find("GameOver");
+	
 		gameOverScreen.SetActive(false);
-
-		startScreen = GameObject.Find("MainMenu");
-
-		goalUI = GameObject.Find("Goal");
 		goalUI.SetActive(false);
 
 		//get on screen lists to put images into later
-		livesHolder = goalUI.transform.FindChild("LivesList").gameObject;
-
-		collectHolder = goalUI.transform.FindChild("CollectableList").gameObject;
 		shapeList.Add("collect", collectHolder);
-		dangerousHolder = goalUI.transform.FindChild("DangerousList").gameObject;
 		shapeList.Add("dangerous", dangerousHolder);
-		hostileHolder = goalUI.transform.FindChild("HostileList").gameObject;
 		shapeList.Add("hostile", hostileHolder);
-		//		solidHolder = UIPointer.transform.FindChild("SolidList").gameObject;
-		//		shapeList.Add("solid", solidHolder);
 
-		//get ui text areas to write to later
-		pointsHolder = goalUI.transform.FindChild("ScoreSet").FindChild("Score").GetComponent<Text>();
-		shapesCollected = gameOverScreen.transform.FindChild("GoalCount").GetComponent<Text>();
 	}
 
 	//set initial game values and update ui accordingly. Then start game.
@@ -108,7 +95,7 @@ public class PlayerControl : MonoBehaviour {
 		pointsHolder.text = ""+points;
 
 		//show player at screen centre
-		gameObject.renderer.enabled = true;
+		gameObject.GetComponent<Renderer>().enabled = true;
 		transform.position = new Vector3(0.0f,0.0f,0.0f);
 
 		//set and show lives
@@ -119,7 +106,7 @@ public class PlayerControl : MonoBehaviour {
 			
 			img.GetComponent<Image>().sprite = playerSprite.GetComponent<SpriteRenderer>().sprite; 
 			
-			img.transform.SetParent(livesHolder.transform, false);
+			img.transform.SetParent(livesHolder.GetComponent<Transform>(), false);
 			img.name = "life";
 		}
 
@@ -127,8 +114,8 @@ public class PlayerControl : MonoBehaviour {
 		for(int  i = 0; i<shapeCount; i++){
 			int selection = zeroToN(shapes.Length);
 			GameObject shape = Instantiate(shapes[selection], 
-			                               	new Vector3(transform.position.x + Random.Range(-maxDistance, maxDistance), 
-			            								transform.position.y + Random.Range(-maxDistance, maxDistance)), 
+			                               	new Vector3(myTransform.position.x + Random.Range(-maxDistance, maxDistance), 
+			            								myTransform.position.y + Random.Range(-maxDistance, maxDistance)), 
 			                               				Quaternion.identity) 
 											as GameObject;
 			
@@ -152,7 +139,7 @@ public class PlayerControl : MonoBehaviour {
 
 		img.GetComponent<Image>().sprite = shapes[shapeIndexOf(kp.Key)].GetComponent<SpriteRenderer>().sprite; 
 
-		img.transform.SetParent(shapeList[kp.Value].transform, false);
+		img.GetComponent<Transform>().SetParent(shapeList[kp.Value].GetComponent<Transform>(), false);
 		img.name = kp.Key;
 
 	}
@@ -162,7 +149,7 @@ public class PlayerControl : MonoBehaviour {
 
 		GameObject listPointer = null;
 		if(shapeList.TryGetValue(goals[k], out listPointer)){
-			GameObject img = shapeList[goals[k]].transform.FindChild(k).gameObject;
+			GameObject img = shapeList[goals[k]].GetComponent<Transform>().FindChild(k).gameObject;
 			Destroy(img);
 		}
 		goals.Remove(k);
@@ -234,7 +221,7 @@ public class PlayerControl : MonoBehaviour {
 
 		shapesCollected.text = ""+points;
 
-		this.gameObject.renderer.enabled = false;
+		this.gameObject.GetComponent<Renderer>().enabled = false;
 		goalUI.SetActive(false);
 		gameOverScreen.SetActive(true);
 
@@ -248,13 +235,14 @@ public class PlayerControl : MonoBehaviour {
 		
 		Debug.Log ("proceeding with "+lives);
 
-		Destroy(livesHolder.transform.FindChild("life").gameObject);
+
 		
 		if(lives>1){
-			audio.PlayOneShot(damage, 0.7F);
+			GetComponent<AudioSource>().PlayOneShot(damage, 0.7F);
 			lives--;
+			Destroy(livesHolder.GetComponent<Transform>().FindChild("life").gameObject);
 		}else{
-			audio.PlayOneShot(dieSound, 0.7F);
+			GetComponent<AudioSource>().PlayOneShot(dieSound, 0.7F);
 			goToGameOver();
 			
 		}
@@ -303,31 +291,31 @@ public class PlayerControl : MonoBehaviour {
 
 			case 1:
 			case 7:
-				transform.eulerAngles = new Vector3(0,0,270);
+			myTransform.eulerAngles = new Vector3(0,0,270);
 				break;
 			case 2:
 			case 11:
-			transform.eulerAngles = new Vector3(0,0,180);
+			myTransform.eulerAngles = new Vector3(0,0,180);
 				break;
 			case 3:
-                transform.eulerAngles = new Vector3(0,0,225);
+			myTransform.eulerAngles = new Vector3(0,0,225);
 				break;
 			case 4:
 			case 13:
-			     transform.eulerAngles = new Vector3(0,0,0);
+			myTransform.eulerAngles = new Vector3(0,0,0);
 				break;
 			case 5:
-				transform.eulerAngles = new Vector3(0,0,315);
+			myTransform.eulerAngles = new Vector3(0,0,315);
 				break;
 			case 8:
 			case 14:
-				transform.eulerAngles = new Vector3(0,0,90);
+			myTransform.eulerAngles = new Vector3(0,0,90);
 				break;
 			case 10:
-				transform.eulerAngles = new Vector3(0,0,135);
+			myTransform.eulerAngles = new Vector3(0,0,135);
 				break;
 			case 12:
-				transform.eulerAngles = new Vector3(0,0,45);
+			myTransform.eulerAngles = new Vector3(0,0,45);
 				break;
 			//These combinations cancel themselves out
 			case 0:
@@ -339,8 +327,8 @@ public class PlayerControl : MonoBehaviour {
 		}
 
 		//update position
-		float a = Mathf.Deg2Rad*transform.eulerAngles.z;
-		rigidbody2D.velocity = new Vector2( -(Mathf.Sin(a)*velocity), Mathf.Cos(a)*velocity);
+		float a = Mathf.Deg2Rad*myTransform.eulerAngles.z;
+		GetComponent<Rigidbody2D>().velocity = new Vector2( -(Mathf.Sin(a)*velocity), Mathf.Cos(a)*velocity);
 
 	}
 	
@@ -357,17 +345,17 @@ public class PlayerControl : MonoBehaviour {
 
 	//creates a new shape off screen in the direction the player is traveling
 	public void replaceShape(){
-		float angle = Mathf.Deg2Rad*(transform.eulerAngles.z + Random.Range(-80.0f, 80.0f));
+		float angle = Mathf.Deg2Rad*(myTransform.eulerAngles.z + Random.Range(-80.0f, 80.0f));
 		float magnitude = Random.Range(minDistance, maxDistance);
 
-		Instantiate(shapes[zeroToN(shapes.Length)], new Vector3(transform.position.x -(Mathf.Sin(angle)*magnitude), transform.position.y+Mathf.Cos(angle)*magnitude), Quaternion.identity);
+		Instantiate(shapes[zeroToN(shapes.Length)], new Vector3(myTransform.position.x -(Mathf.Sin(angle)*magnitude), myTransform.position.y+Mathf.Cos(angle)*magnitude), Quaternion.identity);
 	}
 
 	//increment points and play point collected sfx. Call for goal change if enough points have been scored
 	public void addPoint(){
 
 		points++;
-		audio.PlayOneShot(point, 0.7F);
+		GetComponent<AudioSource>().PlayOneShot(point, 0.7F);
 		pointsHolder.text = ""+points;
 		if(points%10==0){
 			changeGoals();

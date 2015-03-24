@@ -9,6 +9,6 @@ public class TrackPlayer : MonoBehaviour {
 	
 	//match the player's position
 	void Update () {
-		transform.position = new Vector3(player.transform.position.x, player.transform.position.y, -10.0f);
+		GetComponent<Transform>().position = new Vector3(player.GetComponent<Transform>().position.x, player.GetComponent<Transform>().position.y, -10.0f);
 	}
 }
